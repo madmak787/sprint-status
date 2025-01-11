@@ -1,0 +1,30 @@
+All Sprints: Array
+(
+    [0] => Array
+        (
+            [id] => 1
+            [sprint_id] => 9
+            [ticket_id] => 1
+            [jira_id] => DC-1615
+            [created_at] => 2025-01-03 23:42:05
+        )
+
+    [1] => Array
+        (
+            [id] => 2
+            [sprint_id] => 8
+            [ticket_id] => 1
+            [jira_id] => DC-1615
+            [created_at] => 2025-01-03 23:42:05
+        )
+
+    [2] => Array
+        (
+            [id] => 3
+            [sprint_id] => 7
+            [ticket_id] => 1
+            [jira_id] => DC-1615
+            [created_at] => 2025-01-03 23:42:05
+        )
+
+)

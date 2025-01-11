@@ -1,0 +1,13 @@
+@media (min-width: 1400px) {
+    .container-xxl {
+        max-width: 1600px;
+    }
+}
+
+.ticket-sprints {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	max-height: 115px;
+	margin-top: 0;
+	padding-top: 130px;
+}

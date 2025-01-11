@@ -1,0 +1,185 @@
+<?php
+if ( ! class_exists( 'SPRINT_Ajax_Ticket' ) && defined( 'ABSPATH' ) ) {
+
+ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
+
+/**
+ * SPRINT_Ajax_Ticket loader class.
+ */
+class SPRINT_Ajax_Ticket {
+
+    function __construct() {
+        self::set_filters();
+    }
+
+    function set_filters() {
+        add_action( 'wp_ajax_sprint_all_tickets', [$this,'sprint_all_tickets'] );
+        add_action( 'wp_ajax_sprint_tickets', [$this,'sprint_tickets'] );
+        add_action( 'wp_ajax_selected_sprint', [$this,'selected_sprint'] );
+        add_action( 'wp_ajax_add_ticket', [$this,'add_ticket'] );
+        add_action( 'wp_ajax_update_ticket', [$this,'update_ticket'] );
+        add_action( 'wp_ajax_delete_ticket', [$this,'delete_ticket'] );
+        
+        add_action( 'wp_ajax_get_jira_details', [$this,'get_jira_details'] );
+    }
+
+    function sprint_all_tickets() {
+        if(isset($_POST['id']) && !empty($_POST['id'])) {
+            $tickets = [sp_fetch_one(TICKETS_TABLE, ['id' => $_POST['id']])];
+        } else {
+            $tickets = sp_fetch_all(TICKETS_TABLE, 'id', 'DESC');
+        }
+        wp_send_json_success($tickets);
+    }
+
+    function sprint_tickets() {
+        global $wpdb;
+        $sprint_id = (isset($_POST['sprint_id']) && !empty($_POST['sprint_id']))?$_POST['sprint_id']:false;
+        if($sprint_id) {
+            // Append sprint specific data
+            $query = $wpdb->prepare(
+                "SELECT tickets.* FROM {$wpdb->prefix}" . TICKETS_TABLE . " AS tickets WHERE tickets.id IN (
+                    SELECT relation.ticket_id FROM {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation WHERE relation.sprint_id = %d
+                )", $sprint_id
+            );
+            $tickets = $wpdb->get_results($query);
+            wp_send_json_success($tickets);
+        }
+    }
+
+    function selected_sprint() {
+        $ticket_id = (isset($_POST['ticket_id']) && !empty($_POST['ticket_id']))?$_POST['ticket_id']:false;
+        $sprint_id = (isset($_POST['sprint_id']) && !empty($_POST['sprint_id']))?$_POST['sprint_id']:false;
+        $return['selected_sprint'] = 0;
+        $return['comment'] = '';
+        $return['percentage'] = 0;
+        $return['status'] = '';
+
+        if($ticket_id && $sprint_id) {
+            // Append sprint specific data
+            $selected = sp_search(REVISION_TABLE, ['ticket_id' => ['=', $ticket_id], 'sprint_id' => ['=', $sprint_id]]);
+            if(!empty($selected)) {
+                $return['selected_sprint'] = $selected[0]['sprint_id'];
+                $return['comment'] = $selected[0]['comment'];
+                $return['percentage'] = $selected[0]['percentage'];
+                $return['status'] = $selected[0]['status'];
+            }
+        }
+        wp_send_json_success($return);
+    }
+
+    function add_ticket() {
+        unset($_POST['id']);
+
+        if(!in_array($_POST['selected_sprint'], $_POST['sprint'])) {
+            wp_send_json_error('Selected Sprint is not assigned to ticket.');
+        }
+
+        $ticket = [
+            'jira_id' => $_POST['jira_id'],
+            'user_id' => $_POST['user_id'],
+            'name' => $_POST['name'],
+            'description' => str_replace('\\', '', $_POST['description']),
+            'estimates' => $_POST['estimates'],
+        ];
+        $ticket_id = sp_insert(TICKETS_TABLE, $ticket);
+        // Add revisions
+        if(isset($_POST['sprint'][0]) && !empty($_POST['sprint'][0])) {
+            foreach($_POST['sprint'] as $s) {
+                $relation = [
+                    'sprint_id' => $s,
+                    'ticket_id' => $ticket_id,
+                    'jira_id' => $_POST['jira_id'],
+                ];
+                sp_insert(RELATIONSHIP_TABLE, $relation);
+            }
+        }
+        // Add specific statuses
+        $revision = [
+            'sprint_id' => $_POST['selected_sprint'],
+            'jira_id' => $_POST['jira_id'],
+            'ticket_id' => $ticket_id,
+            'status' => $_POST['status'],
+            'percentage' => $_POST['percentage'],
+            'comment' => $_POST['comment'],
+        ];
+        sp_insert(REVISION_TABLE, $revision);
+        // Send a success response
+        return $this->sprint_tickets();
+    }
+
+    function update_ticket() {
+        // Verify if the required data is present
+        if (!isset($_POST['id']) || empty($_POST['id'])) {
+            wp_send_json_error(['message' => 'Ticket ID is required.']);
+        }
+        if(!in_array($_POST['selected_sprint'], $_POST['sprint'])) {
+            wp_send_json_error('Selected Sprint is not assigned to ticket.');
+        }
+        // Update ticket details
+        $ticket = [
+            // 'jira_id' => $_POST['jira_id'],
+            'user_id' => $_POST['user_id'],
+            'name' => $_POST['name'],
+            'description' => str_replace('\\', '', $_POST['description']),
+            'estimates' => $_POST['estimates'],
+        ];
+        sp_update(TICKETS_TABLE, $ticket, ['id' => $_POST['id']]);
+        // Update revisions
+        if(isset($_POST['sprint'][0]) && !empty($_POST['sprint'][0])) {
+            sp_delete(RELATIONSHIP_TABLE, ['ticket_id' => $_POST['id']]);
+            foreach($_POST['sprint'] as $s) {
+                $relation = [
+                    'sprint_id' => $s,
+                    'ticket_id' => $_POST['id'],
+                    'jira_id' => $_POST['jira_id'],
+                ];
+                sp_insert(RELATIONSHIP_TABLE, $relation, );
+            }
+        }
+        // Add specific statuses
+        $revision = [
+            'sprint_id' => $_POST['selected_sprint'],
+            'jira_id' => $_POST['jira_id'],
+            'ticket_id' => $_POST['id'],
+            'status' => $_POST['status'],
+            'percentage' => $_POST['percentage'],
+            'comment' => $_POST['comment'],
+        ];
+        
+        if(sp_fetch_one(REVISION_TABLE, ['sprint_id' => $_POST['selected_sprint'], 'ticket_id' => $_POST['id']])) {
+            sp_update(REVISION_TABLE, $revision, ['sprint_id' => $_POST['selected_sprint'], 'ticket_id' => $_POST['id']]);
+        } else {
+            sp_insert(REVISION_TABLE, $revision);
+        }
+
+        unset($_POST);
+        // Send a success response
+        return $this->sprint_tickets();
+    }
+
+    function delete_ticket() {
+        sp_delete(TICKETS_TABLE, ['id' => $_POST['id']]);
+        unset($_POST);
+        // Send a success response
+        return $this->sprint_tickets();
+    }
+
+    function get_jira_details() {
+        $ji = get_option('sprint_jira');
+        $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
+        $ticketDetails = $jira->getTicketDetails($_POST['id']);
+        $details = analyzeTicketDetails($ticketDetails);
+        // $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
+        // error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
+        wp_send_json_success($details);
+    }
+}
+
+/**
+ * Instantiate the DSWLights loader class.
+ *
+ * @since 2.0
+ */
+new SPRINT_Ajax_Ticket();
+}
