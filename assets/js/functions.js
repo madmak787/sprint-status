@@ -335,3 +335,43 @@ function noTable() {
         <tbody class="fw-semibold text-gray-600"><tr><td align="center">Nothing to display.</td></tr></tbody>
     `);
 }
+
+function downloadReport() {
+    const sprint_id = jQuery('select[name="sprint_id"]').val();
+    const ticket_id = jQuery('select[name="ticket_id"]').val();
+    const user_id = jQuery('select[name="user_id"]').val();
+    // Download the report
+    jQuery.ajax({
+        url: ajax_url, // WordPress AJAX URL
+        method: "POST",
+        data: {
+            action: "export_data", // Use the action corresponding to your PHP class method
+            sprint_id: sprint_id,
+            ticket_id: ticket_id,
+            user_id: user_id,
+        },
+        xhrFields: {
+            responseType: 'blob' // Expect a binary data (blob) response
+        },
+        success: function (response, status, xhr) {
+            // Check for a valid file response
+            const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+            if (contentDisposition) {
+                const fileName = contentDisposition.match(/filename="(.+)"/)[1] || 'export.xlsx';
+
+                // Create a download link
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(response);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.error("Invalid file response.");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", error);
+        }
+    });
+}

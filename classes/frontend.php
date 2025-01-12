@@ -70,21 +70,17 @@ class SPRINT_Front {
     function sprint_template_redirect() {
         $options = get_option( 'sprint' );
         $title = get_bloginfo( 'name' );
-        
-        if(get_query_var( SPRINT_URL )) {
+        $qv = empty(get_query_var( SPRINT_URL )) ? true : get_query_var( SPRINT_URL );
+        $sp = empty(get_query_var( 'sprintpage' )) ? 'dashboard' : get_query_var( 'sprintpage' );
+        echo ($qv && is_user_logged_in());
+        if($qv && is_user_logged_in()) {
             do_action('sprint_init');
             
             if ( !$options['enable'] )
                 wp_die( __( 'SPRINT is disabled by the Administrator.' ) );
-
-            if ( !is_user_logged_in() ) {
-                $title = SPRINT_NAME . ' | ' . $title;
-                include SPRINT_PLUGIN_PATH.'/templates/frontend/index.php';
-                exit;
-            }
             
             $id = '';
-            switch(get_query_var( 'sprintpage' )){
+            switch($sp){
                 case 'dashboard':
                     $title = "Dashboard | $title";
                     include SPRINT_PLUGIN_PATH.'/templates/frontend/dashboard.php'; exit;

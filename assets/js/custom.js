@@ -248,27 +248,30 @@ jQuery(document).ready(function() {
                     // Ensure response.data exists and is an array
                     if (Array.isArray(response.data)) {
                         const $ticketSelect = jQuery('select[name="ticket_id"]');
+                        if($ticketSelect.hasClass('no')) {
+                            // do nothing
+                        } else {
+                            // Clear existing options
+                            $ticketSelect.empty();
 
-                        // Clear existing options
-                        $ticketSelect.empty();
+                            // Append new options to select[name="ticket_id"]
+                            response.data.forEach((v) => {
+                                // Create a new option element
+                                const option = new Option(v.name, v.id);
+                                // Add the data-jira attribute
+                                option.setAttribute("data-jira", v.jira_id);
+                                option.setAttribute("data-user", v.user_id);
+                                // Append the option to the select element
+                                $ticketSelect.append(option);
+                            });
 
-                        // Append new options to select[name="ticket_id"]
-                        response.data.forEach((v) => {
-                            // Create a new option element
-                            const option = new Option(v.name, v.id);
-                            // Add the data-jira attribute
-                            option.setAttribute("data-jira", v.jira_id);
-                            option.setAttribute("data-user", v.user_id);
-                            // Append the option to the select element
-                            $ticketSelect.append(option);
-                        });
-
-                        // Reinitialize Select2 for ticket dropdown
-                        if ($ticketSelect.data('select2')) {
-                            $ticketSelect.select2('destroy'); // Destroy existing Select2 instance
+                            // Reinitialize Select2 for ticket dropdown
+                            if ($ticketSelect.data('select2')) {
+                                $ticketSelect.select2('destroy'); // Destroy existing Select2 instance
+                            }
+                            $ticketSelect.select2(); // Reinitialize Select2
+                            reloadSprintTickets();
                         }
-                        $ticketSelect.select2(); // Reinitialize Select2
-                        reloadSprintTickets();
                     } else {
                         console.error("Invalid data format in response:", response);
                     }

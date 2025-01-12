@@ -36,7 +36,13 @@ define( 'SPRINT_PLUGIN_PATH', trailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'SPRINT_PLUGIN_URL', trailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 define( 'SPRINT_MAIN_URL', site_url('/') );
 
-//Load Everything
+// load PhpSpreadsheet
+require_once 'lib/vendor/autoload.php';
+// use PhpOffice\PhpSpreadsheet\Spreadsheet;
+// use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+// Load Everything
 require_once 'classes/load-classes.php';
 require_once 'ajax/index.php';
+
 require_once 'installation.php';
