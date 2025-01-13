@@ -22,10 +22,27 @@ class SPRINT_Ajax_Bug {
     }
 
     function ticket_bugs() {
-        $bug_id = (isset($_POST['id']) && !empty($_POST['id']))?$_POST['id']:false;
-        $bugs = $bug_id 
-            ? [sp_fetch_one(ISSUES_TABLE, ['id' => $bug_id])]
-            : sp_fetch_all(ISSUES_TABLE, 'id', 'DESC');
+        $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
+        if(isset($_POST['id']) && !empty($_POST['id'])) {
+            $bugs = [sp_fetch_one(ISSUES_TABLE, ['id' => $_POST['id']])];
+        } else {
+            $bugs = sp_fetch_all(ISSUES_TABLE, 'id', 'DESC');
+            $bugs = array_map(function ($bug) use ($excerpt) {
+                $bug['description'] = $excerpt ? substr($bug['description'], 0, $excerpt) . ( strlen($bug['description'])>$excerpt ? '...' : '' ) : $bug['description'];
+                $user = get_user_by( 'id', $bug['reported_by'] );
+                $bug['reported_by'] = $user->user_email;
+                $sprint = sp_fetch_one(SPRINT_TABLE, ['id' => $bug['sprint_id']]);
+                $bug['sprint_name'] = $sprint['name'];
+                $ticket = sp_fetch_one(TICKETS_TABLE, ['id' => $bug['ticket_id']]);
+                $bug['ticket_name'] = $ticket['name'];
+                $bug['type'] = BTYPES[$bug['type']];
+                unset($bug['created_at']);
+                unset($bug['user_id']);
+                unset($bug['sprint_id']);
+                unset($bug['ticket_id']);
+                return $bug;
+            }, $bugs);
+        }
         
         wp_send_json_success($bugs);
     }

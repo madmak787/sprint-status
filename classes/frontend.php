@@ -72,7 +72,6 @@ class SPRINT_Front {
         $title = get_bloginfo( 'name' );
         $qv = empty(get_query_var( SPRINT_URL )) ? true : get_query_var( SPRINT_URL );
         $sp = empty(get_query_var( 'sprintpage' )) ? 'dashboard' : get_query_var( 'sprintpage' );
-        echo ($qv && is_user_logged_in());
         if($qv && is_user_logged_in()) {
             do_action('sprint_init');
             

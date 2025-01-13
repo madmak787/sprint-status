@@ -54,9 +54,10 @@
                     </div>
                     <div class="row g-9 mb-8">
                         <div class="col-md-12 fv-row export">
-                            <a href="#" class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary">Export Sprint</a>
-                            <a href="#" class="btn btn-outline btn-outline-dashed btn-outline-info btn-active-light-info">Export Ticket</a>
-                            <a href="#" class="btn btn-outline btn-outline-dashed btn-outline-warning btn-active-light-warning">Export User</a>
+                            <button type="button" name="sprint" value="1" class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary">Export Sprint</button>
+                            <button type="button" name="ticket" value="1" class="btn btn-outline btn-outline-dashed btn-outline-info btn-active-light-info">Export Ticket</button>
+                            <button type="button" name="user" value="1" class="btn btn-outline btn-outline-dashed btn-outline-warning btn-active-light-warning">Export User</button>
+                            <button type="button" name="full" value="1" class="btn btn-outline btn-outline-dashed btn-outline-danger btn-active-light-danger">Full Report</button>
                         </div>
                     </div>
                 </div>
@@ -73,9 +74,9 @@
 jQuery(document).ready(function() {
     reloadSprintTickets();
 
-    jQuery(document).on('click', '.export a', function (e) {
+    jQuery(document).on('click', '.export button', function (e) {
         e.preventDefault();
-        downloadReport();
+        downloadReport(jQuery(this).prop('name'));
     });
 });
 </script>

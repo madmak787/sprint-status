@@ -6,6 +6,22 @@ $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
     <div class="col-md-6 fv-row">
         <label class="required fs-6 fw-semibold mb-2">JIRA ID</label>
         <input class="form-control form-control-solid jira_id" placeholder="Enter JIRA ID" name="jira_id" autocomplete="off" />
+        <div class="mb-2"></div>
+        <label class="required fs-6 fw-semibold mb-2">Type</label>
+        <div class="d-flex flex-column align-items-start justify-content-center gap-2">
+            <?php
+            foreach(TTYPES as $key => $type) {
+                ?>
+                <label class="form-check form-check-custom form-check-inline form-check-solid me-5 types">
+                    <input class="form-check-input" name="type" type="radio" value="<?=$key?>" />
+                    <span class="fw-semibold ps-2 fs-6">
+                        <?=unslug($type)?>
+                    </span>
+                </label>
+                <?php
+            }
+            ?>
+        </div>
     </div>
     <div class="col-md-6 fv-row">
         <label class="required fs-6 fw-semibold mb-2">Sprint</label>

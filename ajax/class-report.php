@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
+use PhpOffice\PhpSpreadsheet\Chart\Layout;
 
 if ( ! class_exists( 'SPRINT_Ajax_report' ) && defined( 'ABSPATH' ) ) {
 global $wpdb;
@@ -52,19 +53,19 @@ class SPRINT_Ajax_report {
             $data[] = [
                 'name' => 'Sheet 1',
                 'data' => $this->get_data_by_user($user_id),
-                'charts' => [
-                    [
-                        'type' => DataSeries::TYPE_BARCHART, // Chart type
-                        // TYPE_BARCHART
-                        // TYPE_LINECHART
-                        // TYPE_PIECHART
-                        // TYPE_AREACHART
-                        'columns' => ['A', 'C'], // Columns to use for the chart
-                        'title' => 'Ticket Data',
-                        'x_axis' => 'Ticket IDs',
-                        'y_axis' => 'Minutes',
-                    ],
-                ],
+                // 'charts' => [
+                //     [
+                //         'type' => DataSeries::TYPE_BARCHART, // Chart type
+                //         // TYPE_BARCHART
+                //         // TYPE_LINECHART
+                //         // TYPE_PIECHART
+                //         // TYPE_AREACHART
+                //         'columns' => ['A', 'C'], // Columns to use for the chart
+                //         'title' => 'Ticket Data',
+                //         'x_axis' => 'Ticket IDs',
+                //         'y_axis' => 'Minutes',
+                //     ],
+                // ],
             ];
 
             $filename = 'user-tickets';
@@ -272,6 +273,7 @@ class SPRINT_Ajax_report {
         header('Cache-Control: max-age=0');
     
         $writer = new Xlsx($spreadsheet);
+        // $writer->setIncludeCharts(true); // Enable charts
         $writer->save('php://output');
         exit;
     }
@@ -336,42 +338,30 @@ class SPRINT_Ajax_report {
         }
     }
 
-    private function add_chart_to_sheet($sheet, $chart, $rowCount) {
-        $chartType = $chart['type']; // e.g., 'bar', 'line', etc.
-        $columns = $chart['columns']; // Columns to use for the chart (e.g., ['A', 'B'])
-        $title = $chart['title'] ?? 'Chart';
-        $xAxisLabel = $chart['x_axis'] ?? 'X-Axis';
-        $yAxisLabel = $chart['y_axis'] ?? 'Y-Axis';
-    
-        // Prepare data series
-        $dataSeriesLabels = [];
-        $xAxisTickValues = [];
-        $dataSeriesValues = [];
-    
-        foreach ($columns as $index => $column) {
-            $dataSeriesLabels[] = new DataSeriesValues(
-                'String',
-                $sheet->getTitle() . '!$' . $column . '$1',
-                null,
-                1
-            );
-    
-            $xAxisTickValues[] = new DataSeriesValues(
-                'String',
-                $sheet->getTitle() . '!$' . $columns[0] . '$2:$' . $columns[0] . '$' . $rowCount,
-                null
-            );
-    
-            $dataSeriesValues[] = new DataSeriesValues(
-                'Number',
-                $sheet->getTitle() . '!$' . $column . '$2:$' . $column . '$' . $rowCount,
-                null
-            );
+    private function add_chart_to_sheet($sheet, $columns, $chartType) {
+        // Ensure $columns has at least two entries: one for categories and one for values
+        if (count($columns) < 2) {
+            throw new \Exception("At least two columns are required: one for categories and one for values.");
         }
     
-        // Build the chart
+        // Define data ranges
+        $categoryRange = $columns[0] . '2:' . $columns[0] . $sheet->getHighestRow();
+        $valueRange = $columns[1] . '2:' . $columns[1] . $sheet->getHighestRow();
+    
+        // Define the Data Series
+        $dataSeriesLabels = [
+            new DataSeriesValues('String', $sheet->getTitle() . '!$' . $columns[1] . '$1', null, 1),
+        ];
+        $xAxisTickValues = [
+            new DataSeriesValues('String', $sheet->getTitle() . '!$' . $categoryRange, null, 4),
+        ];
+        $dataSeriesValues = [
+            new DataSeriesValues('Number', $sheet->getTitle() . '!$' . $valueRange, null, 4),
+        ];
+    
+        // Create DataSeries
         $dataSeries = new DataSeries(
-            $chartType, // Chart type
+            $chartType,
             null,
             range(0, count($dataSeriesValues) - 1),
             $dataSeriesLabels,
@@ -379,23 +369,25 @@ class SPRINT_Ajax_report {
             $dataSeriesValues
         );
     
-        $plotArea = new PlotArea(null, [$dataSeries]);
+        // Create the chart layout and plot
+        $layout = new Layout();
+        $layout->setShowVal(true);
+        $layout->setShowCatName(true);
+    
+        $plotArea = new PlotArea($layout, [$dataSeries]);
         $legend = new Legend(Legend::POSITION_RIGHT, null, false);
+        $title = new Title('Chart Title');
+        $chart = new Chart('sample_chart', $title, $legend, $plotArea);
     
-        $chart = new Chart(
-            $title,
-            new Title($title),
-            $legend,
-            $plotArea,
-            true,
-            0,
-            new Title($xAxisLabel),
-            new Title($yAxisLabel)
-        );
+        // Position chart dynamically at the bottom-left of the data
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+        
+        // Dynamically adjust position based on the sheet's content
+        $chart->setTopLeftPosition('A' . ($highestRow + 2)); // Below the last row
+        $chart->setBottomRightPosition($highestColumn . ($highestRow + 10)); // Spans 10 rows
     
-        // Position the chart on the sheet
-        $chart->setTopLeftPosition('G2');
-        $chart->setBottomRightPosition('P15');
+        // Add the chart to the sheet
         $sheet->addChart($chart);
     }
 }

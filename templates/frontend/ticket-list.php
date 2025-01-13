@@ -51,6 +51,9 @@ jQuery(document).ready(function() {
         e.preventDefault();
         showModal('Add New Ticket', '', 'Add Ticket', 'add_ticket');
     });
+    if(!jQuery('.types [type="radio"]:checked').length) {
+        jQuery('.types [type="radio"]:eq(0)').prop('checked', true);
+    }
 });
 function localEdit(data) {
     fillFormWithObject(data);

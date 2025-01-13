@@ -24,16 +24,27 @@ class SPRINT_Ajax_Ticket {
     }
 
     function sprint_all_tickets() {
+        $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
         if(isset($_POST['id']) && !empty($_POST['id'])) {
             $tickets = [sp_fetch_one(TICKETS_TABLE, ['id' => $_POST['id']])];
         } else {
             $tickets = sp_fetch_all(TICKETS_TABLE, 'id', 'DESC');
+            $tickets = array_map(function ($ticket) use ($excerpt) {
+                $ticket['description'] = $excerpt ? substr($ticket['description'], 0, $excerpt) . ( strlen($ticket['description'])>$excerpt ? '...' : '' ) : $ticket['description'];
+                $user = get_user_by( 'id', $ticket['user_id'] );
+                $ticket['user_email'] = $user->user_email;
+                $ticket['type'] = TTYPES[$ticket['type']];
+                unset($ticket['created_at']);
+                unset($ticket['user_id']);
+                return $ticket;
+            }, $tickets);
         }
         wp_send_json_success($tickets);
     }
 
     function sprint_tickets() {
         global $wpdb;
+        $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
         $sprint_id = (isset($_POST['sprint_id']) && !empty($_POST['sprint_id']))?$_POST['sprint_id']:false;
         if($sprint_id) {
             // Append sprint specific data
@@ -43,6 +54,11 @@ class SPRINT_Ajax_Ticket {
                 )", $sprint_id
             );
             $tickets = $wpdb->get_results($query);
+            $tickets = array_map(function ($ticket) use ($excerpt) {
+                unset($ticket['created_at']);
+                $ticket['description'] = $excerpt ? substr($ticket['description'], 0, $excerpt) : $ticket['description'];
+                return $ticket;
+            }, $tickets);
             wp_send_json_success($tickets);
         }
     }

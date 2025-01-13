@@ -32,6 +32,7 @@ function sprint_plugin_activate() {
         `name` VARCHAR(100) NOT NULL,
         `description` TEXT NOT NULL,
         `estimates` INT(11) NOT NULL,
+        `type` INT(11) NOT NULL,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`)
     ) $charset_collate;";
@@ -76,6 +77,7 @@ function sprint_plugin_activate() {
         `ticket_id` INT(11) NOT NULL,
         `jira_id` VARCHAR(50) NOT NULL,
         `reported_by` INT(11) NOT NULL,
+        `type` INT(11) NOT NULL,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`)
     ) $charset_collate;";

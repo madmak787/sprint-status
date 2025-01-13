@@ -20,10 +20,16 @@ class SPRINT_Ajax_Sprint {
     }
 
     function sprint_sprints() {
+        $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
         if(isset($_POST['id']) && !empty($_POST['id'])) {
             $sprints = [sp_fetch_one(SPRINT_TABLE, ['id' => $_POST['id']])];
         } else {
             $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
+            $sprints = array_map(function ($sprint) use ($excerpt) {
+                unset($sprint['created_at']);
+                $sprint['description'] = $excerpt ? substr($sprint['description'], 0, $excerpt) : $sprint['description'];
+                return $sprint;
+            }, $sprints);
         }
         wp_send_json_success($sprints);
     }

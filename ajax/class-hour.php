@@ -20,10 +20,26 @@ class SPRINT_Ajax_Hour {
     }
 
     function ticket_hours() {
-        $hour_id = (isset($_POST['id']) && !empty($_POST['id']))?$_POST['id']:false;
-        $hours = $hour_id 
-            ? [sp_fetch_one(HOURS_TABLE, ['id' => $hour_id])]
-            : sp_fetch_all(HOURS_TABLE, 'id', 'DESC');
+        $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
+        if(isset($_POST['id']) && !empty($_POST['id'])) {
+            $hours = [sp_fetch_one(HOURS_TABLE, ['id' => $_POST['id']])];
+        } else {
+            $hours = sp_fetch_all(HOURS_TABLE, 'id', 'DESC');
+            $hours = array_map(function ($hour) use ($excerpt) {
+                $hour['comment'] = $excerpt ? substr($hour['comment'], 0, $excerpt) . ( strlen($hour['comment'])>$excerpt ? '...' : '' ) : $hour['comment'];
+                $user = get_user_by( 'id', $hour['user_id'] );
+                $hour['reported_by'] = $user->user_email;
+                $sprint = sp_fetch_one(SPRINT_TABLE, ['id' => $hour['sprint_id']]);
+                $hour['sprint_name'] = $sprint['name'];
+                $ticket = sp_fetch_one(TICKETS_TABLE, ['id' => $hour['ticket_id']]);
+                $hour['ticket_name'] = $ticket['name'];
+                unset($hour['created_at']);
+                unset($hour['user_id']);
+                unset($hour['sprint_id']);
+                unset($hour['ticket_id']);
+                return $hour;
+            }, $hours);
+        }
         
         wp_send_json_success($hours);
     }

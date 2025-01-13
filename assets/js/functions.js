@@ -33,6 +33,7 @@ function loadAjaxTable() {
         type: 'GET',
         data: {
             action: action,
+            excerpt: 220,
         },
         success: function (response) {
             initTable(response.data);    
@@ -336,7 +337,7 @@ function noTable() {
     `);
 }
 
-function downloadReport() {
+function downloadReport(btn = '') {
     const sprint_id = jQuery('select[name="sprint_id"]').val();
     const ticket_id = jQuery('select[name="ticket_id"]').val();
     const user_id = jQuery('select[name="user_id"]').val();
@@ -349,6 +350,7 @@ function downloadReport() {
             sprint_id: sprint_id,
             ticket_id: ticket_id,
             user_id: user_id,
+            button: btn,
         },
         xhrFields: {
             responseType: 'blob' // Expect a binary data (blob) response
