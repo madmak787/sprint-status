@@ -26,14 +26,55 @@ class SPRINT_Ajax_Ticket {
     function sprint_all_tickets() {
         $excerpt = isset($_REQUEST['excerpt']) && !empty($_REQUEST['excerpt']) ? $_REQUEST['excerpt'] : false;
         if(isset($_POST['id']) && !empty($_POST['id'])) {
-            $tickets = [sp_fetch_one(TICKETS_TABLE, ['id' => $_POST['id']])];
+            global $wpdb;
+            // $ticket_only = sp_fetch_one(TICKETS_TABLE, ['id' => $_POST['id']]);
+            // $ticket_with_sprint = 
+
+            $id = $jira_id = $_POST['id'];
+            // Append sprint specific data
+            $query = $wpdb->prepare(
+                "SELECT 
+                    tickets.*,
+                    GROUP_CONCAT(DISTINCT relation.sprint_id) AS sprint_ids,
+                    revision.sprint_id AS selected_sprint,
+                    revision.status AS status,
+                    revision.percentage AS percentage,
+                    revision.comment AS comment
+                FROM 
+                    {$wpdb->prefix}" . TICKETS_TABLE . " AS tickets
+                LEFT JOIN 
+                    {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation
+                ON 
+                    tickets.id = relation.ticket_id
+                LEFT JOIN 
+                    {$wpdb->prefix}" . REVISION_TABLE . " AS revision
+                ON 
+                    relation.sprint_id = revision.sprint_id AND tickets.id = revision.ticket_id
+                WHERE 
+                    tickets.id = %d OR tickets.jira_id = %s
+                GROUP BY 
+                    tickets.id",
+                $id, // Replace with the ticket ID or null
+                $jira_id // Replace with the Jira ID or null
+            );
+            
+            // Fetch the results
+            $tickets = $wpdb->get_results($query, ARRAY_A);
+            
+            // Format sprint_ids as an array
+            $tickets = array_map(function ($ticket) use ($excerpt) {
+                $ticket['sprint'] = explode(',', $ticket['sprint_ids']);
+                $ticket['action'] = 'update_ticket';
+                return $ticket;
+            }, $tickets);
+            
         } else {
             $tickets = sp_fetch_all(TICKETS_TABLE, 'id', 'DESC');
             $tickets = array_map(function ($ticket) use ($excerpt) {
                 $ticket['description'] = $excerpt ? substr($ticket['description'], 0, $excerpt) . ( strlen($ticket['description'])>$excerpt ? '...' : '' ) : $ticket['description'];
                 $user = get_user_by( 'id', $ticket['user_id'] );
-                $ticket['user_email'] = $user->user_email;
-                $ticket['type'] = TTYPES[$ticket['type']];
+                $ticket['user'] = $user->display_name;
+                $ticket['type'] = ucfirst(TTYPES[$ticket['type']]);
                 unset($ticket['created_at']);
                 unset($ticket['user_id']);
                 return $ticket;
@@ -121,7 +162,8 @@ class SPRINT_Ajax_Ticket {
         ];
         sp_insert(REVISION_TABLE, $revision);
         // Send a success response
-        return $this->sprint_tickets();
+        $_REQUEST['excerpt'] = 220;
+        return $this->sprint_all_tickets();
     }
 
     function update_ticket() {
@@ -171,24 +213,71 @@ class SPRINT_Ajax_Ticket {
 
         unset($_POST);
         // Send a success response
-        return $this->sprint_tickets();
+        $_REQUEST['excerpt'] = 220;
+        return $this->sprint_all_tickets();
     }
 
     function delete_ticket() {
         sp_delete(TICKETS_TABLE, ['id' => $_POST['id']]);
         unset($_POST);
         // Send a success response
-        return $this->sprint_tickets();
+        $_REQUEST['excerpt'] = 220;
+        return $this->sprint_all_tickets();
     }
 
     function get_jira_details() {
-        $ji = get_option('sprint_jira');
-        $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
-        $ticketDetails = $jira->getTicketDetails($_POST['id']);
-        $details = analyzeTicketDetails($ticketDetails);
-        // $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
-        // error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
-        wp_send_json_success($details);
+        // check if ticket exists
+        global $wpdb;
+        $id = $jira_id = $_POST['id'];
+        // Append sprint specific data
+        $query = $wpdb->prepare(
+            "SELECT 
+                tickets.*,
+                GROUP_CONCAT(DISTINCT relation.sprint_id) AS sprint_ids,
+                revision.sprint_id AS selected_sprint,
+                revision.status AS status,
+                revision.percentage AS percentage,
+                revision.comment AS comment
+            FROM 
+                {$wpdb->prefix}" . TICKETS_TABLE . " AS tickets
+            LEFT JOIN 
+                {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation
+            ON 
+                tickets.id = relation.ticket_id
+            LEFT JOIN 
+                {$wpdb->prefix}" . REVISION_TABLE . " AS revision
+            ON 
+                relation.sprint_id = revision.sprint_id AND tickets.id = revision.ticket_id
+            WHERE 
+                tickets.id = %d OR tickets.jira_id = %s
+            GROUP BY 
+                tickets.id",
+            $id, // Replace with the ticket ID or null
+            $jira_id // Replace with the Jira ID or null
+        );
+        
+        // Fetch the results
+        $tickets = $wpdb->get_results($query, ARRAY_A);
+        
+        // Format sprint_ids as an array
+        $tickets = array_map(function ($ticket) {
+            $ticket['sprint'] = explode(',', $ticket['sprint_ids']);
+            $ticket['action'] = 'update_ticket';
+            return $ticket;
+        }, $tickets);
+
+        if($tickets) {
+            wp_send_json_success($tickets[0]);
+        } else {
+            // fetch details from jira
+            $ji = get_option('sprint_jira');
+            $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
+            $ticketDetails = $jira->getTicketDetails($_POST['id']);
+            $details = analyzeTicketDetails($ticketDetails);
+            // $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
+            // error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
+            wp_send_json_success($details);
+        }
     }
 }
 

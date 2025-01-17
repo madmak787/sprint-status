@@ -202,6 +202,8 @@ jQuery(document).ready(function() {
         jQuery('#modal form').trigger('reset');
         jQuery('#modal [name="action"], #modal [name="id"]').val('');
         jQuery('#modal [name="selected_sprint"]').parent().removeClass('active');
+        jQuery('.jira_id').prop('readonly', false);
+        jQuery('#modal .jira_id').removeProp('readonly');
         fillFormWithObject(bugMock);
     });
 
