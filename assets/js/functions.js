@@ -4,7 +4,6 @@ function showModal(title='', description='', btn_label = 'Submit', action = '') 
     jQuery('#modal h1').html(title);
     jQuery('#modal #description').html(description);
     jQuery('#modal #btn-label').html(btn_label);
-    
     // if has password field
     const $passwordField = jQuery('#modal [type="password"]');
     if ($passwordField.length) {
@@ -56,7 +55,9 @@ function replaceTableData(newData) {
 
 function fillFormWithObject(dataObject) {
     const $form = jQuery("#content form");
-
+    const $label = jQuery("#content #btn-label").text();
+    jQuery('.jira_id').prop('readonly', false);
+    jQuery('.jira_id').removeProp('readonly');
     if (!$form.length) {
         console.error("Form not found with selector: #content form");
         return;
@@ -93,7 +94,7 @@ function fillFormWithObject(dataObject) {
                 }
             } else {
                 if(key==='jira_id') {
-                    $input.prop('readonly', true);
+                    // $input.prop('readonly', true);
                 }
                 $input.val(value);
             }

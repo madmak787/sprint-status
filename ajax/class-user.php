@@ -38,7 +38,7 @@ class SPRINT_Ajax_User {
                 'username' => $user->data->user_login,
                 'user_email' => $user->data->user_email,
                 'display_name' => $user->data->display_name,
-                'roles' => $user->roles[0],
+                'roles' => !empty($user->roles[0])?$user->roles[0]:'',
             ];
         }, $users);
         wp_send_json_success($users);
