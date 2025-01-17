@@ -130,3 +130,5 @@ function convertMinutesToHoursAndMinutes($totalMinutes) {
     // Join the parts with a space
     return implode(" ", $result);
 }
+
+require_once ABSPATH . WPINC . '/pluggable.php';
