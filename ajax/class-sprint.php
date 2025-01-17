@@ -26,8 +26,16 @@ class SPRINT_Ajax_Sprint {
         } else {
             $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
             $sprints = array_map(function ($sprint) use ($excerpt) {
+                global $wpdb;
                 unset($sprint['created_at']);
                 $sprint['description'] = $excerpt ? substr($sprint['description'], 0, $excerpt) : $sprint['description'];
+                $query = $wpdb->prepare(
+                    "SELECT tickets.* FROM {$wpdb->prefix}" . TICKETS_TABLE . " AS tickets WHERE tickets.id IN (
+                        SELECT relation.ticket_id FROM {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation WHERE relation.sprint_id = %d
+                    )", $sprint['id']
+                );
+                $tickets = $wpdb->get_results($query);
+                $sprint['tickets'] = count($tickets);
                 return $sprint;
             }, $sprints);
         }

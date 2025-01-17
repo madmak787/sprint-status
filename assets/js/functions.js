@@ -96,6 +96,11 @@ function fillFormWithObject(dataObject) {
                 if(key==='jira_id') {
                     // $input.prop('readonly', true);
                 }
+                if(key==='action' && value.toLowerCase().includes('update')) {
+                    const btn = jQuery('#btn-label').html();
+                    const label = btn.replace('Add','Update');
+                    jQuery('#btn-label').html(label);
+                }
                 $input.val(value);
             }
         }

@@ -27,6 +27,8 @@ class JiraAPI
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_SSL_VERIFYHOST => 0, // Disable SSL host verification
+            CURLOPT_SSL_VERIFYPEER => 0, // Disable SSL peer verification
         ]);
 
         if ($data) {
@@ -41,9 +43,13 @@ class JiraAPI
         if ($httpCode >= 200 && $httpCode < 300) {
             return json_decode($response, true);
         } else {
+            error_log("\r\nEndpoint: " . $url, 3, SPRINT_PLUGIN_PATH . 'log/jira.log');
+            error_log("\r\nHeaders: " .  print_r($headers, true), 3, SPRINT_PLUGIN_PATH . 'log/jira.log');
+            error_log("\r\nResponse: " .  print_r($response, true), 3, SPRINT_PLUGIN_PATH . 'log/jira.log');
             throw new Exception("API request failed with status code $httpCode: $response");
         }
     }
+
 
     public function getAllTickets($jql = '', $fields = 'summary,assignee,status,priority')
     {

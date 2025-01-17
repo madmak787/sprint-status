@@ -64,6 +64,7 @@ class SPRINT_Ajax_Ticket {
             // Format sprint_ids as an array
             $tickets = array_map(function ($ticket) use ($excerpt) {
                 $ticket['sprint'] = explode(',', $ticket['sprint_ids']);
+                $ticket['action'] = 'update_ticket';
                 return $ticket;
             }, $tickets);
             
@@ -220,6 +221,7 @@ class SPRINT_Ajax_Ticket {
         sp_delete(TICKETS_TABLE, ['id' => $_POST['id']]);
         unset($_POST);
         // Send a success response
+        $_REQUEST['excerpt'] = 220;
         return $this->sprint_all_tickets();
     }
 
@@ -260,6 +262,7 @@ class SPRINT_Ajax_Ticket {
         // Format sprint_ids as an array
         $tickets = array_map(function ($ticket) {
             $ticket['sprint'] = explode(',', $ticket['sprint_ids']);
+            $ticket['action'] = 'update_ticket';
             return $ticket;
         }, $tickets);
 
