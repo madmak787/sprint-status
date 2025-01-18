@@ -1,0 +1,23 @@
+name: Deploy to Hostinger via FTP
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Deploy to Hostinger via FTP
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.1
+              with:
+                  server: ${{ secrets.FTP_HOST }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+                  local-dir: ./ # Local directory to deploy (root folder)
+                  server-dir: /public_html/sprint-status/wp-content/plugins/sprint-status/ # Remote directory on your Hostinger server
