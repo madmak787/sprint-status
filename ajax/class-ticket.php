@@ -271,12 +271,15 @@ class SPRINT_Ajax_Ticket {
         } else {
             // fetch details from jira
             $ji = get_option('sprint_jira');
-            $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
-            $ticketDetails = $jira->getTicketDetails($_POST['id']);
-            $details = analyzeTicketDetails($ticketDetails);
-            $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
-            error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
-            wp_send_json_success($details);
+            if(!empty($ji['token'])) {
+                $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
+                $ticketDetails = $jira->getTicketDetails($_POST['id']);
+                $details = analyzeTicketDetails($ticketDetails);
+                $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
+                error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
+                wp_send_json_success($details);
+            }
+            wp_send_json_success([]);
         }
     }
 }

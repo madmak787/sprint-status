@@ -45,7 +45,6 @@ class JiraAPI
         }
     }
 
-
     public function getAllTickets($jql = '', $fields = 'summary,assignee,status,priority')
     {
         $endpoint = "/rest/api/3/search?jql=" . urlencode($jql) . "&fields=" . urlencode($fields);
