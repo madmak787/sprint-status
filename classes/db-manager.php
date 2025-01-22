@@ -79,7 +79,6 @@ function sp_search($table_name, $search_conditions) {
     $conditions = sp_prepare_conditions_with_operators($search_conditions);
     $query = "SELECT * FROM " . $wpdb->prefix . $table_name . " WHERE $conditions";
     $results = $wpdb->get_results($query, ARRAY_A);
-    sp_debug_query();
     return $results;
 }
 
@@ -121,7 +120,6 @@ function sp_prepare_conditions_with_operators($conditions) {
             }
         }
     }
-    error_log("\r\n" . print_r($sql_conditions,true), 3, SPRINT_PLUGIN_PATH . 'log/cond.log');
     return implode(' AND ', $sql_conditions);
 }
 

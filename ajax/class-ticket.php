@@ -94,9 +94,10 @@ class SPRINT_Ajax_Ticket {
                     SELECT relation.ticket_id FROM {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation WHERE relation.sprint_id = %d
                 )", $sprint_id
             );
-            $tickets = $wpdb->get_results($query);
+            $tickets = $wpdb->get_results($query, ARRAY_A);
             $tickets = array_map(function ($ticket) use ($excerpt) {
                 unset($ticket['created_at']);
+                $ticket['name'] = $ticket['name'] . "(" . $ticket['jira_id'] . ")";
                 $ticket['description'] = $excerpt ? substr($ticket['description'], 0, $excerpt) : $ticket['description'];
                 return $ticket;
             }, $tickets);
@@ -275,8 +276,6 @@ class SPRINT_Ajax_Ticket {
                 $jira = new JiraAPI($ji['domain'], $ji['email'], $ji['token']);
                 $ticketDetails = $jira->getTicketDetails($_POST['id']);
                 $details = analyzeTicketDetails($ticketDetails);
-                $log_file = SPRINT_PLUGIN_PATH . "/log/jira.log";
-                error_log(print_r($details, true) . PHP_EOL, 3, $log_file);
                 wp_send_json_success($details);
             }
             wp_send_json_success([]);

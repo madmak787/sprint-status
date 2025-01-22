@@ -28,8 +28,6 @@ class SPRINT_Ajax_User {
             $args['include'] = [$_POST['id']];
         }
         $users = get_users($args);
-        // $log_file = WP_CONTENT_DIR . "/sprint.log";
-        // error_log(print_r(get_user_meta($user->data->ID), true) . PHP_EOL, 3, $log_file);
         $users = array_map(function ($user) {
             return [
                 'id' => $user->data->ID,
