@@ -86,6 +86,7 @@ class SPRINT_Ajax_Bug {
         sp_update(ISSUES_TABLE, $bug, ['id' => $_POST['id']]);
         unset($_POST);
         // Send a success response
+        $_REQUEST['excerpt'] = 220;
         return $this->ticket_bugs();
     }
 
@@ -93,6 +94,7 @@ class SPRINT_Ajax_Bug {
         sp_delete(ISSUES_TABLE, ['id' => $_POST['id']]);
         unset($_POST);
         // Send a success response
+        $_REQUEST['excerpt'] = 220;
         return $this->ticket_bugs();
     }
 }
