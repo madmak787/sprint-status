@@ -72,7 +72,7 @@ function sprint_plugin_activate() {
     // The DB Query
     $sql = "CREATE TABLE IF NOT EXISTS $table (
         `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-        `description` VARCHAR(500) NOT NULL,
+        `description` TEXT NOT NULL,
         `sprint_id` INT(11) NOT NULL,
         `ticket_id` INT(11) NOT NULL,
         `jira_id` VARCHAR(50) NOT NULL,
@@ -93,7 +93,7 @@ function sprint_plugin_activate() {
         `jira_id` VARCHAR(50) NOT NULL,
         `user_id` INT(11) NOT NULL,
         `minutes` INT(11) NOT NULL,
-        `comment` VARCHAR(500) NOT NULL,
+        `comment` TEXT NOT NULL,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`)
     ) $charset_collate;";
