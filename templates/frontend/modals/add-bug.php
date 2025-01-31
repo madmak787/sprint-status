@@ -25,6 +25,15 @@ $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
         <input class="form-control form-control-solid mb-2" name="jira_id" readonly="readonly" />
     </div>
     <div class="col-md-4 fv-row">
+        <label class="required fs-6 fw-semibold mb-2">Reported By</label>
+        <select class="form-select mb-2" name="reported_by" data-control="select2" data-hide-search="true" data-placeholder="Select user">
+            <option></option>
+            <?php foreach($users as $u) { ?>
+                <option value="<?=$u->ID?>"><?=$u->display_name?></option>
+            <?php } ?>
+        </select>
+    </div>
+    <div class="col-md-4 fv-row">
         <label class="required fs-6 fw-semibold mb-2">Type</label>
         <div class="d-flex flex-column align-items-start justify-content-center gap-2">
             <?php
@@ -40,15 +49,6 @@ $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
             }
             ?>
         </div>
-    </div>
-    <div class="col-md-4 fv-row">
-        <label class="required fs-6 fw-semibold mb-2">Reported By</label>
-        <select class="form-select mb-2" name="reported_by" data-control="select2" data-hide-search="true" data-placeholder="Select user">
-            <option></option>
-            <?php foreach($users as $u) { ?>
-                <option value="<?=$u->ID?>"><?=$u->display_name?></option>
-            <?php } ?>
-        </select>
     </div>
 </div>
 <div class="row g-9 mb-8">

@@ -32,27 +32,32 @@ class SPRINT_Ajax_report {
 
     public function export_data() {
         $filename = 'sprints';
-        $sprint_id = isset($_POST['sprint_id']) ? $_POST['sprint_id'] : null;
-        $ticket_id = isset($_POST['ticket_id']) ? $_POST['ticket_id'] : null;
-        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+        $sprint_id = !empty($_POST['sprint_id']) ? $_POST['sprint_id'] : null;
+        $ticket_id = !empty($_POST['ticket_id']) ? $_POST['ticket_id'] : null;
+        $user_id = !empty($_POST['user_id']) ? $_POST['user_id'] : null;
 
         $data = [];
 
         if ($sprint_id && $ticket_id) {
             $data = $this->get_data_by_sprint_and_ticket($sprint_id, $ticket_id);
+            print_r($data);
         } elseif ($sprint_id) {
             $data = $this->get_data_by_sprint($sprint_id);
+            print_r($data);
         } elseif ($ticket_id) {
             $data = $this->get_data_by_ticket($ticket_id);
+            print_r($data);
         } elseif ($user_id) {
+            require 'reports/' . $_POST['button'] . '.php';
+
             // $data = $this->get_data_by_user($user_id);
             // $data[] = [
             //     'name' => 'Sheet 1',
             //     'data' => $this->get_data_by_user($user_id)
             // ];
-            $data[] = [
-                'name' => 'Sheet 1',
-                'data' => $this->get_data_by_user($user_id),
+            // $data[] = [
+            //     'name' => 'Sheet 1',
+            //     'data' => $this->get_data_by_user($user_id),
                 // 'charts' => [
                 //     [
                 //         'type' => DataSeries::TYPE_BARCHART, // Chart type
@@ -66,7 +71,9 @@ class SPRINT_Ajax_report {
                 //         'y_axis' => 'Minutes',
                 //     ],
                 // ],
-            ];
+            // ];
+
+            print_r($data);
 
             $filename = 'user-tickets';
         }
