@@ -21,6 +21,17 @@ function sp_update($table_name, $data, $where) {
 }
 
 /**
+ * Fetch a all row by condition.
+ */
+function sp_fetch($table_name, $where) {
+    global $wpdb;
+    $conditions = sp_prepare_conditions($where);
+    $sql = "SELECT * FROM " . $wpdb->prefix . $table_name . " WHERE $conditions";
+    $query = $wpdb->prepare($sql);
+    return $wpdb->get_results($query, ARRAY_A);
+}
+
+/**
  * Fetch all rows from a table.
  */
 function sp_fetch_all($table_name, $order_by = 'id', $order = 'ASC') {
@@ -29,10 +40,8 @@ function sp_fetch_all($table_name, $order_by = 'id', $order = 'ASC') {
     // Validate order_by and order parameters
     $valid_order_by = preg_replace('/[^a-zA-Z0-9_]/', '', $order_by); // Allow only alphanumeric and underscores
     $valid_order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';   // Allow only 'ASC' or 'DESC'
-
-    $query = $wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}$table_name ORDER BY $valid_order_by $valid_order"
-    );
+    $sql = "SELECT * FROM {$wpdb->prefix}$table_name ORDER BY $valid_order_by $valid_order";
+    $query = $wpdb->prepare($sql);
 
     return $wpdb->get_results($query, ARRAY_A);
 }
