@@ -112,7 +112,8 @@ if (!class_exists('SPRINT_Ajax_report') && defined('ABSPATH')) {
                 $user = get_user_by('id', $ticket['user_id']);
                 // $return['description'] = $ticket['description'];
                 $return['ticket_ID'] = $ticket['jira_id'];
-                $return['summary'] = $ticket['description'];
+                $return['summary'] = $ticket['name'];
+                // $return['description'] = $ticket['description'];
                 $return['assignee'] = $user->display_name;
                 $return['estimation'] = $ticket['estimates'];
                 $return['type'] = ucfirst(TTYPES[$ticket['type']]);
@@ -257,7 +258,7 @@ if (!class_exists('SPRINT_Ajax_report') && defined('ABSPATH')) {
             $this->add_charts($sheet);
 
             // Add a cells group
-            
+
         }
 
         private function add_charts($sheet) {
