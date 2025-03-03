@@ -256,6 +256,7 @@ if (!class_exists('SPRINT_Ajax_report') && defined('ABSPATH')) {
             // How I can add a chart to the sheet?
             $this->add_charts($sheet);
 
+            // Add a cells group
             
         }
 

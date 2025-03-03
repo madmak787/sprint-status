@@ -363,24 +363,11 @@ function downloadReport(btn = '') {
         // },
         success: function (response, status, xhr) {
             var r = JSON.parse(response);
-            // Redirect to download link
-            window.location.href = r.file_url;
-            
-            // Check for a valid file response
-            // const contentDisposition = xhr.getResponseHeader('Content-Disposition');
-            // if (contentDisposition) {
-            //     const fileName = contentDisposition.match(/filename="(.+)"/)[1] || 'export.xlsx';
-
-            //     // Create a download link
-            //     const link = document.createElement('a');
-            //     link.href = window.URL.createObjectURL(response);
-            //     link.download = fileName;
-            //     document.body.appendChild(link);
-            //     link.click();
-            //     document.body.removeChild(link);
-            // } else {
-            //     console.error("Invalid file response.");
-            // }
+            const link = document.createElement('a');
+            link.href = r.file_url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         },
         error: function (xhr, status, error) {
             console.error("AJAX Error:", error);

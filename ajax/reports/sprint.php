@@ -24,7 +24,7 @@ foreach($sprints as $i=>$sprint) {
         $return['%'] = $revision['percentage'];
         
         $issues = sp_fetch(ISSUES_TABLE, ['sprint_id' => $sprint_id, 'ticket_id' => $ticket['id']]);
-        $return['Issues/Improvements'] = count($issues) || '';
+        $return['Issues/Improvements'] = count($issues) > 0 ? count($issues) : '';
         $reporters = [];
         foreach($issues as $issue) {
             $reported_by = get_user_by('id', $issue['reported_by']);
@@ -41,5 +41,5 @@ foreach($sprints as $i=>$sprint) {
         'data' => $tickets
     ];
 
-    if($i==12) break;
+    // if($i==12) break;
 }
