@@ -34,6 +34,8 @@ class SPRINT_Ajax_Sprint {
                         SELECT relation.ticket_id FROM {$wpdb->prefix}" . RELATIONSHIP_TABLE . " AS relation WHERE relation.sprint_id = %d
                     )", $sprint['id']
                 );
+                $sprint['start_date'] = date("d M, Y", strtotime($sprint['start_date']));
+                $sprint['end_date'] = date("d M, Y", strtotime($sprint['end_date']));
                 $tickets = $wpdb->get_results($query);
                 $sprint['tickets'] = count($tickets);
                 return $sprint;

@@ -196,7 +196,10 @@ if (!class_exists('SPRINT_Ajax_report') && defined('ABSPATH')) {
             $fileUrl = SPRINT_PLUGIN_URL . '/downloads/'.slug($filename).'.xlsx';
             $writer->save($filePath);
 
-            echo json_encode(['file_url' => $fileUrl]);
+            echo json_encode([
+                'file_url' => $fileUrl,
+                'file_name' => $filename,
+            ]);
             exit;
         }
 

@@ -7,6 +7,7 @@ global $wpdb;
 function sp_insert($table_name, $data) {
     global $wpdb;
     unset($data['action']);
+    $data = wp_unslash($data);
     $wpdb->insert($wpdb->prefix . $table_name, $data);
     return $wpdb->insert_id;
 }
@@ -17,6 +18,7 @@ function sp_insert($table_name, $data) {
 function sp_update($table_name, $data, $where) {
     global $wpdb;
     unset($data['action']);
+    $data = wp_unslash($data);
     return $wpdb->update($wpdb->prefix . $table_name, $data, $where);
 }
 
@@ -28,7 +30,7 @@ function sp_fetch($table_name, $where) {
     $conditions = sp_prepare_conditions($where);
     $sql = "SELECT * FROM " . $wpdb->prefix . $table_name . " WHERE $conditions";
     $query = $wpdb->prepare($sql);
-    return $wpdb->get_results($query, ARRAY_A);
+    return wp_unslash($wpdb->get_results($query, ARRAY_A));
 }
 
 /**
@@ -43,7 +45,7 @@ function sp_fetch_all($table_name, $order_by = 'id', $order = 'ASC') {
     $sql = "SELECT * FROM {$wpdb->prefix}$table_name ORDER BY $valid_order_by $valid_order";
     $query = $wpdb->prepare($sql);
 
-    return $wpdb->get_results($query, ARRAY_A);
+    return wp_unslash($wpdb->get_results($query, ARRAY_A));
 }
 
 /**
@@ -53,7 +55,7 @@ function sp_fetch_one($table_name, $where) {
     global $wpdb;
     $conditions = sp_prepare_conditions($where);
     $query = "SELECT * FROM " . $wpdb->prefix . $table_name . " WHERE $conditions LIMIT 1";
-    return $wpdb->get_row($query, ARRAY_A);
+    return wp_unslash($wpdb->get_row($query, ARRAY_A));
 }
 
 /**

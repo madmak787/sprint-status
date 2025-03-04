@@ -365,6 +365,7 @@ function downloadReport(btn = '') {
             var r = JSON.parse(response);
             const link = document.createElement('a');
             link.href = r.file_url;
+            link.download = r.file_name || 'sprint-report';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

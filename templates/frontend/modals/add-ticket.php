@@ -25,7 +25,7 @@ $sprints = sp_fetch_all(SPRINT_TABLE, 'id', 'DESC');
     </div>
     <div class="col-md-6 fv-row">
         <label class="required fs-6 fw-semibold mb-2">Sprint</label>
-        <div class="d-flex flex-column align-items-start justify-content-center gap-2 ticket-sprints">
+        <div class="d-flex flex-column align-items-start justify-content-start gap-2 ticket-sprints">
             <?php
             foreach($sprints as $s) {
                 ?>
