@@ -58,6 +58,7 @@
                             <button type="button" name="ticket" value="1" class="btn btn-outline btn-outline-dashed btn-outline-info btn-active-light-info">Export Ticket</button>
                             <button type="button" name="user" value="1" class="btn btn-outline btn-outline-dashed btn-outline-warning btn-active-light-warning">Export User</button>
                             <button type="button" name="full" value="1" class="btn btn-outline btn-outline-dashed btn-outline-danger btn-active-light-danger">Full Report</button>
+                            <button type="button" name="custom" value="1" class="btn btn-outline btn-outline-dashed btn-outline-secondary btn-active-light-secondary">Custom Report</button>
                         </div>
                     </div>
                 </div>
